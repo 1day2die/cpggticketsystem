@@ -1,7 +1,7 @@
 <?php
 
-use OneDayToDie\Ticketsystem\Http\Controllers\TicketsController;
-use OneDayToDie\Ticketsystem\Http\Controllers\Admin\AdminTicketsController;
+use OneDayToDie\TicketSystem\Http\Controllers\TicketsController;
+use OneDayToDie\TicketSystem\Http\Controllers\Admin\AdminTicketsController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
