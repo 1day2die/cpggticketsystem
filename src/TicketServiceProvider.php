@@ -8,10 +8,10 @@ class TicketServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-            $sidebarNavigation = __DIR__ . '/../resources/sidebar'
-    
+            $sidebarNavigation = __DIR__ . '/../resources/sidebar';
+
         $this->loadNavigation(NavigationLocation::sidebar, $sidebarNavigation);
-        
+
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
