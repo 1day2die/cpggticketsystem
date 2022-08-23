@@ -21,14 +21,14 @@ class AdminTicketsController extends Controller
     public function index() {
         $tickets = Ticket::orderBy('id','desc')->paginate(10);
         $ticketcategories = TicketCategory::all();
-        return view("moderator.ticket.index", compact("tickets", "ticketcategories"));
+        return view("admin.ticket.index", compact("tickets", "ticketcategories"));
     }
     public function show($ticket_id) {
         $ticket = Ticket::where("ticket_id", $ticket_id)->firstOrFail();
         $ticketcomments = $ticket->ticketcomments;
         $ticketcategory = $ticket->ticketcategory;
         $server = Server::where('id', $ticket->server)->first();
-        return view("moderator.ticket.show", compact("ticket", "ticketcategory", "ticketcomments", "server"));
+        return view("admin.ticket.show", compact("ticket", "ticketcategory", "ticketcomments", "server"));
     }
 
     public function close($ticket_id) {
@@ -72,20 +72,20 @@ class AdminTicketsController extends Controller
                 return $tickets->ticketcategory->name;
             })
             ->editColumn('title', function (Ticket $tickets) {
-                return '<a class="text-info"  href="' . route('moderator.ticket.show', ['ticket_id' => $tickets->ticket_id]) . '">' . "#" . $tickets->ticket_id . " - " . $tickets->title . '</a>';
+                return '<a class="text-info"  href="' . route('admin.ticket.show', ['ticket_id' => $tickets->ticket_id]) . '">' . "#" . $tickets->ticket_id . " - " . $tickets->title . '</a>';
             })
             ->editColumn('user_id', function (Ticket $tickets) {
                 return '<a href="' . route('admin.users.show', $tickets->user->id) . '">' . $tickets->user->name . '</a>';
             })
             ->addColumn('actions', function (Ticket $tickets) {
                 return '
-                            <a data-content="'.__("View").'" data-toggle="popover" data-trigger="hover" data-placement="top" href="' . route('moderator.ticket.show', ['ticket_id' => $tickets->ticket_id]) . '" class="btn btn-sm text-white btn-info mr-1"><i class="fas fa-eye"></i></a>
-                            <form class="d-inline"  method="post" action="' . route('moderator.ticket.close', ['ticket_id' => $tickets->ticket_id ]) . '">
+                            <a data-content="'.__("View").'" data-toggle="popover" data-trigger="hover" data-placement="top" href="' . route('admin.ticket.show', ['ticket_id' => $tickets->ticket_id]) . '" class="btn btn-sm text-white btn-info mr-1"><i class="fas fa-eye"></i></a>
+                            <form class="d-inline"  method="post" action="' . route('admin.ticket.close', ['ticket_id' => $tickets->ticket_id ]) . '">
                                 ' . csrf_field() . '
                                 ' . method_field("POST") . '
                             <button data-content="'.__("Close").'" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-warning mr-1"><i class="fas fa-times"></i></button>
                             </form>
-                            <form class="d-inline"  method="post" action="' . route('moderator.ticket.delete', ['ticket_id' => $tickets->ticket_id ]) . '">
+                            <form class="d-inline"  method="post" action="' . route('admin.ticket.delete', ['ticket_id' => $tickets->ticket_id ]) . '">
                                 ' . csrf_field() . '
                                 ' . method_field("POST") . '
                             <button data-content="'.__("Delete").'" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-danger mr-1"><i class="fas fa-trash"></i></button>
@@ -118,7 +118,7 @@ class AdminTicketsController extends Controller
     }
 
     public function blacklist() {
-        return view("moderator.ticket.blacklist");
+        return view("admin.ticket.blacklist");
     }
 
     public function blacklistAdd(Request $request) {
@@ -186,12 +186,12 @@ class AdminTicketsController extends Controller
             })
             ->addColumn('actions', function (TicketBlacklist $blacklist) {
                 return '
-                            <form class="d-inline"  method="post" action="' . route('moderator.ticket.blacklist.change', ['id' => $blacklist->id ]) . '">
+                            <form class="d-inline"  method="post" action="' . route('admin.ticket.blacklist.change', ['id' => $blacklist->id ]) . '">
                                 ' . csrf_field() . '
                                 ' . method_field("POST") . '
                             <button data-content="'.__("Change Status").'" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-warning mr-1"><i class="fas fa-sync-alt"></i></button>
                             </form>
-                            <form class="d-inline"  method="post" action="' . route('moderator.ticket.blacklist.delete', ['id' => $blacklist->id ]) . '">
+                            <form class="d-inline"  method="post" action="' . route('admin.ticket.blacklist.delete', ['id' => $blacklist->id ]) . '">
                                 ' . csrf_field() . '
                                 ' . method_field("POST") . '
                             <button data-content="'.__("Delete").'" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-danger mr-1"><i class="fas fa-trash"></i></button>

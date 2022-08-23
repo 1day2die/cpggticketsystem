@@ -12,7 +12,7 @@
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Dashboard') }}</a></li>
                         <li class="breadcrumb-item"><a class="text-muted"
-                                                       href="{{ route('moderator.ticket.index') }}">{{ __('Ticket') }}</a>
+                                                       href="{{ route('admin.ticket.index') }}">{{ __('Ticket') }}</a>
                         </li>
                     </ol>
                 </div>
@@ -51,7 +51,7 @@
                                     @endif
                                 </p>
                                 <p><b>Created on:</b> {{ $ticket->created_at->diffForHumans() }}</p>
-                                    <form class="d-inline"  method="post" action="{{route('moderator.ticket.close', ['ticket_id' => $ticket->ticket_id ])}}">
+                                    <form class="d-inline"  method="post" action="{{route('admin.ticket.close', ['ticket_id' => $ticket->ticket_id ])}}">
                                         {{csrf_field()}}
                                         {{method_field("POST") }}
                                         <button data-content="{{__("Close")}}" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-warning mr-1"><i class="fas fa-times"></i>{{__("Close")}}</button>
@@ -79,8 +79,8 @@
                                             <span class="badge badge-secondary"> Member </span>
                                         @elseif ($ticket->user->role === "client")
                                             <span class="badge badge-success"> Client </span>
-                                        @elseif ($ticket->user->role === "moderator")
-                                            <span class="badge badge-info"> Moderator </span>
+                                        @elseif ($ticket->user->role === "admin")
+                                            <span class="badge badge-info"> admin </span>
                                         @elseif ($ticket->user->role === "admin")
                                             <span class="badge badge-danger"> Admin </span>
                                         @endif
@@ -102,8 +102,8 @@
                                             <span class="badge badge-secondary"> Member </span>
                                         @elseif ($ticketcomment->user->role === "client")
                                             <span class="badge badge-success"> Client </span>
-                                        @elseif ($ticketcomment->user->role === "moderator")
-                                            <span class="badge badge-info"> Moderator </span>
+                                        @elseif ($ticketcomment->user->role === "admin")
+                                            <span class="badge badge-info"> admin </span>
                                         @elseif ($ticketcomment->user->role === "admin")
                                             <span class="badge badge-danger"> Admin </span>
                                         @endif
@@ -115,7 +115,7 @@
                             </div>
                             @endforeach
                             <div class="comment-form">
-                                <form action="{{ route('moderator.ticket.reply')}}" method="POST" class="form">
+                                <form action="{{ route('admin.ticket.reply')}}" method="POST" class="form">
                                     {!! csrf_field() !!}
                                     <input type="hidden" name="ticket_id" value="{{ $ticket->id }}">
                                     <div class="form-group{{ $errors->has('ticketcomment') ? ' has-error' : '' }}">

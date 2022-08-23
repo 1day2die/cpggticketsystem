@@ -12,7 +12,7 @@
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{{route('home')}}">{{__('Dashboard')}}</a></li>
                         <li class="breadcrumb-item"><a class="text-muted"
-                                                       href="{{route('moderator.ticket.index')}}">{{__('Ticket List')}}</a></li>
+                                                       href="{{route('admin.ticket.index')}}">{{__('Ticket List')}}</a></li>
                     </ol>
                 </div>
             </div>
@@ -68,7 +68,7 @@
                 processing: true,
                 serverSide: true,
                 stateSave: true,
-                ajax: "{{route('moderator.ticket.datatable')}}",
+                ajax: "{{route('admin.ticket.datatable')}}",
                 columns: [
                     {data: 'category'},
                     {data: 'title'},

@@ -74,8 +74,8 @@
                                             <span class="badge badge-secondary"> Member </span>
                                         @elseif ($ticket->user->role === "client")
                                             <span class="badge badge-success"> Client </span>
-                                        @elseif ($ticket->user->role === "moderator")
-                                            <span class="badge badge-info"> Moderator </span>
+                                        @elseif ($ticket->user->role === "admin")
+                                            <span class="badge badge-info"> admin </span>
                                         @elseif ($ticket->user->role === "admin")
                                             <span class="badge badge-danger"> Admin </span>
                                         @endif
@@ -97,8 +97,8 @@
                                             <span class="badge badge-secondary"> Member </span>
                                         @elseif ($ticketcomment->user->role === "client")
                                             <span class="badge badge-success"> Client </span>
-                                        @elseif ($ticketcomment->user->role === "moderator")
-                                            <span class="badge badge-info"> Moderator </span>
+                                        @elseif ($ticketcomment->user->role === "admin")
+                                            <span class="badge badge-info"> admin </span>
                                         @elseif ($ticketcomment->user->role === "admin")
                                             <span class="badge badge-danger"> Admin </span>
                                         @endif
@@ -134,12 +134,12 @@
     </section>
     <!-- END CONTENT -->
     <script type="text/javascript">
-        $(".reply-form").submit(function (e) {        
-            
-            $(".reply-once").attr("disabled", true);     
+        $(".reply-form").submit(function (e) {
+
+            $(".reply-once").attr("disabled", true);
             return true;
         })
-           
+
     </script>
 @endsection
 
