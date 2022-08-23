@@ -1,0 +1,25 @@
+{
+    "name": "1day2die/cpgg-ticketsystem",
+    "description": "A Ticketsystem for controlpanel",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "OneDayToDie\\Ticketsystem\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "1Day2Die",
+            "email": "info@hafuga.de"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "OneDayToDie\\Ticketsystem\\TicketServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {}
+}
