@@ -4,7 +4,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "OneDayToDie\\Ticketsystem\\": "src/"
+            "OneDayToDie\\TicketSystem\\": "src/"
         }
     },
     "authors": [
@@ -16,7 +16,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "OneDayToDie\\Ticketsystem\\TicketServiceProvider"
+                "OneDayToDie\\TicketSystem\\TicketServiceProvider"
             ]
         }
     },

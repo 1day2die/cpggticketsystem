@@ -1,8 +1,7 @@
 <?php
+namespace OneDayToDie\TicketSystem;
 
-namespace OneDayToDie\Ticketsystem;
 
-use Illuminate\Support\ServiceProvider;
 use App\Providers\BasePackageServiceProvider;
 use App\Enums\NavigationLocation;
 

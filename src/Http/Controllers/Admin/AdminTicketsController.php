@@ -1,6 +1,6 @@
 <?php
 
-namespace OneDayToDie\Ticketsystem\Controllers\Admin;
+namespace OneDayToDie\TicketSystem\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;

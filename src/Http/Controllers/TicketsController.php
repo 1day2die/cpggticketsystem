@@ -1,10 +1,10 @@
 <?php
 
-namespace OneDayToDie\Ticketsystem\Http\Controllers;
+namespace OneDayToDie\TicketSystem\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Notification;
@@ -14,9 +14,9 @@ use App\Models\Server;
 use App\Models\TicketComment;
 use App\Models\TicketCategory;
 use App\Models\TicketBlacklist;
-use App\Notifications\Ticket\User\CreateNotification;
-use App\Notifications\Ticket\Admin\AdminCreateNotification;
-use App\Notifications\Ticket\Admin\AdminReplyNotification;
+use Notifications\Ticket\User\CreateNotification;
+use Notifications\Ticket\Admin\AdminCreateNotification;
+use Notifications\Ticket\Admin\AdminReplyNotification;
 
 
 class TicketsController extends Controller
