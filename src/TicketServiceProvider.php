@@ -3,8 +3,9 @@
 namespace OneDayToDie\Ticketsystem;
 
 use Illuminate\Support\ServiceProvider;
+use App\Providers\BasePackageServiceProvider;
 
-class TicketServiceProvider extends ServiceProvider
+class TicketServiceProvider extends BasePackageServiceProvider
 {
     public function boot()
     {
