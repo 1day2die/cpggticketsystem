@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace OneDayToDie\Ticketsystem\Controllers\Admin;
 
-
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Ticket;
 use App\Models\Server;
@@ -10,7 +10,6 @@ use App\Models\TicketCategory;
 use App\Models\TicketComment;
 use App\Models\TicketBlacklist;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

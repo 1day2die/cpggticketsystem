@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace OneDayToDie\Ticketsystem\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -23,9 +24,9 @@ class TicketsController extends Controller
 {
     public function index()
     {
-        $tickets = Ticket::where("user_id", Auth::user()->id)->paginate(10); 
+        $tickets = Ticket::where("user_id", Auth::user()->id)->paginate(10);
         $ticketcategories = TicketCategory::all();
-        
+
         return view("ticket.index", compact("tickets", "ticketcategories"));
     }
     public function create() {
@@ -40,18 +41,18 @@ class TicketsController extends Controller
     }
     public function store(Request $request) {
         $this->validate($request, array(
-        	"title" => "required", 
-        	"ticketcategory" => "required", 
-        	"priority" => "required", 
+        	"title" => "required",
+        	"ticketcategory" => "required",
+        	"priority" => "required",
         	"message" => "required")
     	);
         $ticket = new Ticket(array(
-        	"title" => $request->input("title"), 
-        	"user_id" => Auth::user()->id, 
-        	"ticket_id" => strtoupper(Str::random(5)), 
-        	"ticketcategory_id" => $request->input("ticketcategory"), 
-        	"priority" => $request->input("priority"), 
-        	"message" => $request->input("message"), 
+        	"title" => $request->input("title"),
+        	"user_id" => Auth::user()->id,
+        	"ticket_id" => strtoupper(Str::random(5)),
+        	"ticketcategory_id" => $request->input("ticketcategory"),
+        	"priority" => $request->input("priority"),
+        	"message" => $request->input("message"),
         	"status" => "Open",
             "server" => $request->input("server"))
    		);
@@ -60,7 +61,7 @@ class TicketsController extends Controller
         $admin = User::where('role', 'admin')->orWhere('role', 'mod')->get();
         $user->notify(new CreateNotification($ticket));
         Notification::send($admin, new AdminCreateNotification($ticket, $user));
-        
+
         return redirect()->route('ticket.index')->with('success', __('A ticket has been opened, ID: #') . $ticket->ticket_id);
     }
     public function show($ticket_id) {
@@ -81,9 +82,9 @@ class TicketsController extends Controller
         $ticket->status = "Client Reply";
         $ticket->update();
         $ticketcomment = TicketComment::create(array(
-        	"ticket_id" => $request->input("ticket_id"), 
-        	"user_id" => Auth::user()->id, 
-        	"ticketcomment" => $request->input("ticketcomment"), 
+        	"ticket_id" => $request->input("ticket_id"),
+        	"user_id" => Auth::user()->id,
+        	"ticketcomment" => $request->input("ticketcomment"),
         	"message" => $request->input("message")
         ));
         $user = Auth::user();
@@ -108,7 +109,7 @@ class TicketsController extends Controller
                 switch ($tickets->status) {
                     case 'Open':
                         $badgeColor = 'badge-success';
-                        break; 
+                        break;
                     case 'Closed':
                         $badgeColor = 'badge-danger';
                         break;

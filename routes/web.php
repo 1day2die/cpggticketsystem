@@ -4,14 +4,17 @@ use OneDayToDie\Ticketsystem\Controllers\TicketsController;
 use OneDayToDie\Ticketsystem\Controllers\Admin\AdminTicketsController;
 use Illuminate\Support\Facades\Route;
 
-
+Route::middleware('auth')->group(function () {
     #ticket user
-        Route::get('ticket', [TicketsController::class, 'index'])->name('ticket.index');
-        Route::get('ticket/datatable', [TicketsController::class, 'datatable'])->name('ticket.datatable');
-        Route::get('ticket/new', [TicketsController::class, 'create'])->name('ticket.new');
-        Route::post('ticket/new', [TicketsController::class, 'store'])->name('ticket.new.store');
-        Route::get('ticket/show/{ticket_id}', [TicketsController::class, 'show'])->name('ticket.show');
-        Route::post('ticket/reply', [TicketsController::class, 'reply'])->name('ticket.reply');
+    Route::get('ticket', [TicketsController::class, 'index'])->name('ticket.index');
+    Route::get('ticket/datatable', [TicketsController::class, 'datatable'])->name('ticket.datatable');
+    Route::get('ticket/new', [TicketsController::class, 'create'])->name('ticket.new');
+    Route::post('ticket/new', [TicketsController::class, 'store'])->name('ticket.new.store');
+    Route::get('ticket/show/{ticket_id}', [TicketsController::class, 'show'])->name('ticket.show');
+    Route::post('ticket/reply', [TicketsController::class, 'reply'])->name('ticket.reply');
+});
+
+
 
     Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         #TicketAdmin
