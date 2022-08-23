@@ -26,7 +26,7 @@ class TicketsController extends Controller
         $tickets = Ticket::where("user_id", Auth::user()->id)->paginate(10);
         $ticketcategories = TicketCategory::all();
 
-        return view("ticket.index", compact("tickets", "ticketcategories"));
+        return view("ticket::ticket.index", compact("tickets", "ticketcategories"));
     }
     public function create() {
         #check in blacklist

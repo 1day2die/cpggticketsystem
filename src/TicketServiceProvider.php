@@ -17,8 +17,7 @@ class TicketServiceProvider extends BasePackageServiceProvider
 
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
 
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'ticket');
-        $this->loadViewsFrom(__DIR__ . '/../resources/views/admin', 'adminticket');
+        $this->loadViewsFrom(__DIR__ . '/resources/views', 'ticket');
 
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang/en.json');
 
