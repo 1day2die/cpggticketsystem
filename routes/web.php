@@ -1,6 +1,7 @@
 <?php
 
 use OneDayToDie\Ticketsystem\Controllers\TicketsController;
+use OneDayToDie\Ticketsystem\Controllers\Admin\AdminTicketsController;
 use Illuminate\Support\Facades\Route;
 
 
