@@ -4,6 +4,7 @@ namespace OneDayToDie\Ticketsystem;
 
 use Illuminate\Support\ServiceProvider;
 use App\Providers\BasePackageServiceProvider;
+use App\Enums\NavigationLocation;
 
 class TicketServiceProvider extends BasePackageServiceProvider
 {
