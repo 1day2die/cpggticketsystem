@@ -1,6 +1,6 @@
 <?php
 
-namespace Controlpanel\Vouchers;
+namespace OneDayToDie\Ticketsystem;
 
 use App\Enums\NavigationLocation;
 use App\Helper\NavigationHelper;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Controlpanel\Vouchers;
+namespace OneDayToDie\Ticketsystem;
 
 use Illuminate\Database\Migrations\Migration;
 use Spatie\Permission\Models\Permission;
