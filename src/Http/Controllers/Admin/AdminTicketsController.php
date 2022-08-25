@@ -2,27 +2,39 @@
 
 namespace OneDayToDie\TicketSystem\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Ticket;
-use App\Models\Server;
-use App\Models\TicketCategory;
-use App\Models\TicketComment;
-use App\Models\TicketBlacklist;
 
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use App\Notifications\Ticket\User\ReplyNotification;
+
+use App\Models\Server;
+
+
+use Illuminate\Support\Facades\Blade;
+use OneDayToDie\TicketSystem\Http\Models\Ticket;
+use OneDayToDie\TicketSystem\Http\Models\TicketComment;
+use OneDayToDie\TicketSystem\Http\Models\TicketCategory;
+use OneDayToDie\TicketSystem\Http\Models\TicketBlacklist;
+use Yajra\DataTables\Html\Builder;
 
 class AdminTicketsController extends Controller
 {
-    public function index() {
-        $tickets = Ticket::orderBy('id','desc')->paginate(10);
+    public function index(Request $request)
+    {
+        if ($request->ajax()) {
+            return $this->dataTableQuery();
+        }
+        $html = $this->dataTable();
+
+        $tickets = Ticket::orderBy('updated_at', 'desc')->paginate(10);
         $ticketcategories = TicketCategory::all();
-        return view("admin.ticket.index", compact("tickets", "ticketcategories"));
+        return view("ticket::admin.ticket.index", compact("tickets", "ticketcategories", "html"));
+
     }
-    public function show($ticket_id) {
+
+    public function show($ticket_id)
+    {
         $ticket = Ticket::where("ticket_id", $ticket_id)->firstOrFail();
         $ticketcomments = $ticket->ticketcomments;
         $ticketcategory = $ticket->ticketcategory;
@@ -30,7 +42,8 @@ class AdminTicketsController extends Controller
         return view("admin.ticket.show", compact("ticket", "ticketcategory", "ticketcomments", "server"));
     }
 
-    public function close($ticket_id) {
+    public function close($ticket_id)
+    {
         $ticket = Ticket::where("ticket_id", $ticket_id)->firstOrFail();
         $ticket->status = "Closed";
         $ticket->save();
@@ -38,7 +51,8 @@ class AdminTicketsController extends Controller
         return redirect()->back()->with('success', __('A ticket has been closed, ID: #') . $ticket->ticket_id);
     }
 
-    public function delete($ticket_id){
+    public function delete($ticket_id)
+    {
         $ticket = Ticket::where("ticket_id", $ticket_id)->firstOrFail();
         TicketComment::where("ticket_id", $ticket->id)->delete();
         $ticket->delete();
@@ -46,15 +60,16 @@ class AdminTicketsController extends Controller
 
     }
 
-    public function reply(Request $request) {
+    public function reply(Request $request)
+    {
         $this->validate($request, array("ticketcomment" => "required"));
         $ticket = Ticket::where('id', $request->input("ticket_id"))->firstOrFail();
         $ticket->status = "Answered";
         $ticket->update();
         TicketComment::create(array(
-        	"ticket_id" => $request->input("ticket_id"),
-        	"user_id" => Auth::user()->id,
-        	"ticketcomment" => $request->input("ticketcomment"),
+            "ticket_id" => $request->input("ticket_id"),
+            "user_id" => Auth::user()->id,
+            "ticketcomment" => $request->input("ticketcomment"),
         ));
         $user = User::where('id', $ticket->user_id)->firstOrFail();
         $newmessage = $request->input("ticketcomment");
@@ -62,68 +77,17 @@ class AdminTicketsController extends Controller
         return redirect()->back()->with('success', __('Your comment has been submitted'));
     }
 
-    public function dataTable()
+
+    public function blacklist()
     {
-        $query = Ticket::query();
-
-        return datatables($query)
-            ->addColumn('category', function (Ticket $tickets) {
-                return $tickets->ticketcategory->name;
-            })
-            ->editColumn('title', function (Ticket $tickets) {
-                return '<a class="text-info"  href="' . route('admin.ticket.show', ['ticket_id' => $tickets->ticket_id]) . '">' . "#" . $tickets->ticket_id . " - " . $tickets->title . '</a>';
-            })
-            ->editColumn('user_id', function (Ticket $tickets) {
-                return '<a href="' . route('admin.users.show', $tickets->user->id) . '">' . $tickets->user->name . '</a>';
-            })
-            ->addColumn('actions', function (Ticket $tickets) {
-                return '
-                            <a data-content="'.__("View").'" data-toggle="popover" data-trigger="hover" data-placement="top" href="' . route('admin.ticket.show', ['ticket_id' => $tickets->ticket_id]) . '" class="btn btn-sm text-white btn-info mr-1"><i class="fas fa-eye"></i></a>
-                            <form class="d-inline"  method="post" action="' . route('admin.ticket.close', ['ticket_id' => $tickets->ticket_id ]) . '">
-                                ' . csrf_field() . '
-                                ' . method_field("POST") . '
-                            <button data-content="'.__("Close").'" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-warning mr-1"><i class="fas fa-times"></i></button>
-                            </form>
-                            <form class="d-inline"  method="post" action="' . route('admin.ticket.delete', ['ticket_id' => $tickets->ticket_id ]) . '">
-                                ' . csrf_field() . '
-                                ' . method_field("POST") . '
-                            <button data-content="'.__("Delete").'" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-danger mr-1"><i class="fas fa-trash"></i></button>
-                            </form>
-                ';
-            })
-            ->editColumn('status', function (Ticket $tickets) {
-                switch ($tickets->status) {
-                    case 'Open':
-                        $badgeColor = 'badge-success';
-                        break;
-                    case 'Closed':
-                        $badgeColor = 'badge-danger';
-                        break;
-                    case 'Answered':
-                        $badgeColor = 'badge-info';
-                        break;
-                    default:
-                        $badgeColor = 'badge-warning';
-                        break;
-                }
-
-                return '<span class="badge ' . $badgeColor . '">' . $tickets->status . '</span>';
-            })
-            ->editColumn('updated_at', function (Ticket $tickets) {
-                return $tickets->updated_at ? $tickets->updated_at->diffForHumans() : '';
-            })
-            ->rawColumns(['category', 'title', 'user_id', 'status', 'updated_at', 'actions'])
-            ->make(true);
-    }
-
-    public function blacklist() {
         return view("admin.ticket.blacklist");
     }
 
-    public function blacklistAdd(Request $request) {
+    public function blacklistAdd(Request $request)
+    {
         $user = User::where('id', $request->user_id)->first();
         $check = TicketBlacklist::where('user_id', $user->id)->first();
-        if($check){
+        if ($check) {
             $check->reason = $request->reason;
             $check->status = "True";
             $check->save();
@@ -132,23 +96,24 @@ class AdminTicketsController extends Controller
         }
         TicketBlacklist::create(array(
             "user_id" => $user->id,
-            "status"  => "True",
-            "reason"  => $request->reason,
+            "status" => "True",
+            "reason" => $request->reason,
         ));
         return redirect()->back()->with('success', __('Successfully add User to blacklist, User name: ' . $user->name));
     }
 
 
-    public function blacklistDelete($id) {
+    public function blacklistDelete($id)
+    {
         $blacklist = TicketBlacklist::where('id', $id)->first();
         $blacklist->delete();
         return redirect()->back()->with('success', __('Successfully remove User from blacklist, User name: ' . $blacklist->user->name));
     }
 
-    public function blacklistChange($id) {
+    public function blacklistChange($id)
+    {
         $blacklist = TicketBlacklist::where('id', $id)->first();
-        if($blacklist->status == "True")
-        {
+        if ($blacklist->status == "True") {
             $blacklist->status = "False";
 
         } else {
@@ -158,6 +123,7 @@ class AdminTicketsController extends Controller
         return redirect()->back()->with('success', __('Successfully change status blacklist from, User name: ' . $blacklist->user->name));
 
     }
+
     public function dataTableBlacklist()
     {
         $query = TicketBlacklist::with(['user']);
@@ -185,15 +151,15 @@ class AdminTicketsController extends Controller
             })
             ->addColumn('actions', function (TicketBlacklist $blacklist) {
                 return '
-                            <form class="d-inline"  method="post" action="' . route('admin.ticket.blacklist.change', ['id' => $blacklist->id ]) . '">
+                            <form class="d-inline"  method="post" action="' . route('admin.ticket.blacklist.change', ['id' => $blacklist->id]) . '">
                                 ' . csrf_field() . '
                                 ' . method_field("POST") . '
-                            <button data-content="'.__("Change Status").'" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-warning mr-1"><i class="fas fa-sync-alt"></i></button>
+                            <button data-content="' . __("Change Status") . '" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-warning mr-1"><i class="fas fa-sync-alt"></i></button>
                             </form>
-                            <form class="d-inline"  method="post" action="' . route('admin.ticket.blacklist.delete', ['id' => $blacklist->id ]) . '">
+                            <form class="d-inline"  method="post" action="' . route('admin.ticket.blacklist.delete', ['id' => $blacklist->id]) . '">
                                 ' . csrf_field() . '
                                 ' . method_field("POST") . '
-                            <button data-content="'.__("Delete").'" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-danger mr-1"><i class="fas fa-trash"></i></button>
+                            <button data-content="' . __("Delete") . '" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-danger mr-1"><i class="fas fa-trash"></i></button>
                             </form>
                 ';
             })
@@ -201,6 +167,67 @@ class AdminTicketsController extends Controller
                 return $blacklist->created_at ? $blacklist->created_at->diffForHumans() : '';
             })
             ->rawColumns(['user', 'status', 'reason', 'created_at', 'actions'])
+            ->make(true);
+    }
+
+
+    /**
+     * @description create table
+     *
+     * @return Builder
+     */
+    public function dataTable(): Builder
+    {
+
+        $builder = $this->htmlBuilder
+            ->addColumn(['data' => 'category', 'name' => 'category', 'title' => __('Category')])
+            ->addColumn(['data' => 'prio', 'name' => 'prio', 'title' => __('Priority')])
+            ->addColumn(['data' => 'title', 'name' => 'title', 'title' => __('Title')])
+            ->addColumn(['data' => 'status', 'name' => 'status', 'title' => __('Status')])
+            ->addColumn(['data' => 'updated_at', 'name' => 'updated_at', 'title' => __('Updated at'), 'searchable' => false])
+            ->addAction(['data' => 'actions', 'name' => 'actions', 'title' => __('Actions'), 'searchable' => false, 'orderable' => false])
+            ->parameters($this->dataTableDefaultParameters());
+
+        return $builder;
+    }
+
+
+    /**
+     * @return mixed
+     * @throws Exception
+     */
+    public function dataTableQuery(): mixed
+    {
+        $query = Ticket::where("user_id", Auth::user()->id)->get();
+
+
+        return datatables($query)
+            ->addColumn('category', function (Ticket $ticket) {
+                return '<a class="text-info"  href="' . route('ticket.show', ['ticket_id' => $ticket->ticket_id]) . '">' . "#" . $ticket->ticket_id . " - " . $ticket->title . '</a>';
+            })
+            ->addColumn('prio', function (Ticket $ticket) {
+                return $ticket->priority;
+            })
+            ->addColumn('actions', function (Ticket $ticket) {
+                return Blade::render('
+
+                            <form class="d-inline"  method="post" action="' . route('ticket.close', ['ticket_id' => $ticket->ticket_id]) . '">
+                                ' . csrf_field() . '
+                                ' . method_field("POST") . '
+                            <button data-content="' . __("Close") . '" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-warning mr-1"><i class="fas fa-times"></i></button>
+                            </form>
+');
+            })
+            ->editColumn('title', function (Ticket $ticket) {
+                return "$ticket->title";
+            })
+            ->editColumn('status', function (Ticket $ticket) {
+                return $ticket->status;
+            })
+            ->editColumn('updated_at', function ($model) {
+                return $model->updated_at ? $model->updated_at->diffForHumans() : '';
+            })
+            ->rawColumns(['category', 'actions', 'code'])
             ->make(true);
     }
 

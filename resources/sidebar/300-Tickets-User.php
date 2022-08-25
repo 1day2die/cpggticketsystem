@@ -1,4 +1,4 @@
-@can('ticket.read')
+@can('1day2die.ticket.read')
     <li class="nav-item {{ request()->routeIs('ticket.index') ? 'active' : '' }}">
         <a href="{{ route('ticket.index') }}" class="nav-link">
                     <span class="sidebar-icon me-3">

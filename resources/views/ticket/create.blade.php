@@ -1,6 +1,8 @@
-@extends('layouts.main')
+@extends('layouts.dashboard')
 
 @section('content')
+
+
     <!-- CONTENT HEADER -->
     <section class="content-header">
         <div class="container-fluid">
@@ -53,7 +55,7 @@
                                         <option value="{{ $server->id }}">{{ $server->name }}</option>
                                         @endforeach
                                     </select>
-    
+
                                     @if ($errors->has('category'))
                                     <span class="help-block">
                                         <strong>{{ $errors->first('ticketcategory') }}</strong>
@@ -69,7 +71,7 @@
                                         <option value="{{ $ticketcategory->id }}">{{ $ticketcategory->name }}</option>
                                         @endforeach
                                     </select>
-    
+
                                     @if ($errors->has('category'))
                                     <span class="help-block">
                                         <strong>{{ $errors->first('ticketcategory') }}</strong>
@@ -124,12 +126,12 @@
     </section>
     <!-- END CONTENT -->
     <script type="text/javascript">
-     $(".ticket-form").submit(function (e) {        
-         
-         $(".ticket-once").attr("disabled", true);     
+     $(".ticket-form").submit(function (e) {
+
+         $(".ticket-once").attr("disabled", true);
          return true;
      })
-        
+
     </script>
 @endsection
 

@@ -1,6 +1,7 @@
-@extends('layouts.main')
+@extends('layouts.dashboard')
 
 @section('content')
+
     <!-- CONTENT HEADER -->
     <section class="content-header">
         <div class="container-fluid">
@@ -12,7 +13,8 @@
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{{route('home')}}">{{__('Dashboard')}}</a></li>
                         <li class="breadcrumb-item"><a class="text-muted"
-                                                       href="{{route('admin.ticket.index')}}">{{__('Ticket List')}}</a></li>
+                                                       href="{{route('admin.ticket.index')}}">{{__('Ticket List')}}</a>
+                        </li>
                     </ol>
                 </div>
             </div>
@@ -34,24 +36,10 @@
 
                 <div class="card-body table-responsive">
 
-                    <table id="datatable" class="table table-striped">
-                        <thead>
-                        <tr>
-                            <th>{{__('Category')}}</th>
-                            <th>{{__('Title')}}</th>
-                            <th>{{__('User')}}</th>
-                            <th>{{__('Status')}}</th>
-                            <th>{{__('Last Updated')}}</th>
-                            <th>{{__('Actions')}}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
+                    {!! $html->table() !!}
 
                 </div>
             </div>
-
 
 
         </div>
@@ -59,30 +47,9 @@
 
     </section>
     <!-- END CONTENT -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            $('#datatable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.11.3/i18n/{{config("SETTINGS::LOCALE:DATATABLES")}}.json'
-                },
-                processing: true,
-                serverSide: true,
-                stateSave: true,
-                ajax: "{{route('admin.ticket.datatable')}}",
-                columns: [
-                    {data: 'category'},
-                    {data: 'title'},
-                    {data: 'user_id'},
-                    {data: 'status'},
-                    {data: 'updated_at'},
-                    {data: 'actions', sortable: false},
-                ],
-                fnDrawCallback: function( oSettings ) {
-                    $('[data-toggle="popover"]').popover();
-                }
-            });
-        });
-    </script>
 
+@endsection
 
+@section('scripts')
+    {!! $html->scripts() !!}
 @endsection

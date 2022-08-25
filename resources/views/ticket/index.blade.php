@@ -1,25 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('content')
-    <!-- CONTENT HEADER -->
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1>{{ __('Ticket') }}</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Dashboard') }}</a></li>
-                        <li class="breadcrumb-item"><a class="text-muted"
-                                                       href="{{ route('ticket.index') }}">{{ __('Ticket') }}</a>
-                        </li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- END CONTENT HEADER -->
+
 
     <!-- MAIN CONTENT -->
     <section class="content">
@@ -36,18 +18,10 @@
                         </div>
                         <div class="card-body table-responsive">
 
-                            <table id="datatable" class="table table-striped">
-                                <thead>
-                                <tr>
-                                    <th>{{__('Category')}}</th>
-                                    <th>{{__('Title')}}</th>
-                                    <th>{{__('Status')}}</th>
-                                    <th>{{__('Last Updated')}}</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
+                            {!! $html->table() !!}
+
+
+
                         </div>
                     </div>
                 </div>
@@ -74,5 +48,9 @@
 @endsection
 
 
+
+@section('scripts')
+    {!! $html->scripts() !!}
+@endsection
 
 

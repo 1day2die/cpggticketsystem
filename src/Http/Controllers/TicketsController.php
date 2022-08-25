@@ -4,33 +4,39 @@ namespace OneDayToDie\TicketSystem\Http\Controllers;
 
 
 
+use App\Models\User;
+
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Notification;
 
 use App\Models\Server;
 
 
-use Notifications\Ticket\User\CreateNotification;
-use Notifications\Ticket\Admin\AdminCreateNotification;
-use Notifications\Ticket\Admin\AdminReplyNotification;
-
-
 use OneDayToDie\TicketSystem\Http\Models\Ticket;
 use OneDayToDie\TicketSystem\Http\Models\TicketComment;
 use OneDayToDie\TicketSystem\Http\Models\TicketCategory;
 use OneDayToDie\TicketSystem\Http\Models\TicketBlacklist;
+use Yajra\DataTables\Html\Builder;
 
 class TicketsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tickets = Ticket::where("user_id", Auth::id())->paginate(10);
+        //datatables
+        if ($request->ajax()) {
+            return $this->dataTableQuery();
+        }
+
+        $html = $this->dataTable();
+
+        $tickets = Ticket::where("user_id", Auth::user()->id)->paginate(10);
         $ticketcategories = TicketCategory::all();
 
-        return view("ticket::ticket.index", compact("tickets", "ticketcategories"));
+        return view("ticket::ticket.index", compact("tickets", "ticketcategories", "html"));
     }
     public function create() {
         #check in blacklist
@@ -40,7 +46,7 @@ class TicketsController extends Controller
         }
         $ticketcategories = TicketCategory::all();
         $servers = Auth::user()->servers;
-        return view("ticket.create", compact("ticketcategories", "servers"));
+        return view("ticket::ticket.create", compact("ticketcategories", "servers"));
     }
     public function store(Request $request) {
         $this->validate($request, array(
@@ -61,9 +67,9 @@ class TicketsController extends Controller
    		);
         $ticket->save();
         $user = Auth::user();
-        $admin = User::where('role', 'admin')->orWhere('role', 'mod')->get();
-        $user->notify(new CreateNotification($ticket));
-        Notification::send($admin, new AdminCreateNotification($ticket, $user));
+        $admin = User::permission('1day2die.admin.ticket.read')->permission('1day2die.admin.ticket.write')->get();
+        //$user->notify(new CreateNotification($ticket));
+        //Notification::send($admin, new AdminCreateNotification($ticket, $user));
 
         return redirect()->route('ticket.index')->with('success', __('A ticket has been opened, ID: #') . $ticket->ticket_id);
     }
@@ -72,8 +78,17 @@ class TicketsController extends Controller
         $ticketcomments = $ticket->ticketcomments;
         $ticketcategory = $ticket->ticketcategory;
         $server = Server::where('id', $ticket->server)->first();
-        return view("ticket.show", compact("ticket", "ticketcategory", "ticketcomments", "server"));
+        return view("ticket::ticket.show", compact("ticket", "ticketcategory", "ticketcomments", "server"));
     }
+
+    public function close($ticket_id) {
+        $ticket = Ticket::where("ticket_id", $ticket_id)->firstOrFail();
+        $ticket->status = "Closed";
+        $ticket->save();
+        return redirect()->back()->with('success', __('A ticket has been closed, ID: #') . $ticket->ticket_id);
+    }
+
+
     public function reply(Request $request) {
         #check in blacklist
         $check = TicketBlacklist::where('user_id', Auth::user()->id)->first();
@@ -91,45 +106,78 @@ class TicketsController extends Controller
         	"message" => $request->input("message")
         ));
         $user = Auth::user();
-        $admin = User::where('role', 'admin')->orWhere('role', 'mod')->get();
+        $admin = User::permission('1day2die.admin.ticket.read')->permission('1day2die.admin.ticket.write')->get();
         $newmessage = $request->input("ticketcomment");
-        Notification::send($admin, new AdminReplyNotification($ticket, $user, $newmessage));
+        //Notification::send($admin, new AdminReplyNotification($ticket, $user, $newmessage));
         return redirect()->back()->with('success', __('Your comment has been submitted'));
     }
 
-    public function dataTable()
+
+
+
+
+
+
+
+    /**
+     * @description create table
+     *
+     * @return Builder
+     */
+    public function dataTable(): Builder
+    {
+
+        $builder = $this->htmlBuilder
+            ->addColumn(['data' => 'category', 'name' => 'category', 'title' => __('Category')])
+            ->addColumn(['data' => 'prio', 'name' => 'prio', 'title' => __('Priority')])
+            ->addColumn(['data' => 'title', 'name' => 'title', 'title' => __('Title')])
+            ->addColumn(['data' => 'status', 'name' => 'status', 'title' => __('Status')])
+            ->addColumn(['data' => 'updated_at', 'name' => 'updated_at', 'title' => __('Updated at'), 'searchable' => false])
+            ->addAction(['data' => 'actions', 'name' => 'actions', 'title' => __('Actions'), 'searchable' => false, 'orderable' => false])
+            ->parameters($this->dataTableDefaultParameters());
+
+        return $builder;
+    }
+
+
+
+    /**
+     * @return mixed
+     * @throws Exception
+     */
+    public function dataTableQuery(): mixed
     {
         $query = Ticket::where("user_id", Auth::user()->id)->get();
 
-        return datatables($query)
-            ->addColumn('category', function (Ticket $tickets) {
-                return $tickets->ticketcategory->name;
-            })
-            ->editColumn('title', function (Ticket $tickets) {
-                return '<a class="text-info"  href="' . route('ticket.show', ['ticket_id' => $tickets->ticket_id]) . '">' . "#" . $tickets->ticket_id . " - " . $tickets->title . '</a>';
-            })
-            ->editColumn('status', function (Ticket $tickets) {
-                switch ($tickets->status) {
-                    case 'Open':
-                        $badgeColor = 'badge-success';
-                        break;
-                    case 'Closed':
-                        $badgeColor = 'badge-danger';
-                        break;
-                    case 'Answered':
-                        $badgeColor = 'badge-info';
-                        break;
-                    default:
-                        $badgeColor = 'badge-warning';
-                        break;
-                }
 
-                return '<span class="badge ' . $badgeColor . '">' . $tickets->status . '</span>';
+        return datatables($query)
+            ->addColumn('category', function (Ticket $ticket) {
+                return '<a class="text-info"  href="' . route('ticket.show', ['ticket_id' => $ticket->ticket_id]) . '">' . "#" . $ticket->ticket_id . " - " . $ticket->title . '</a>';
             })
-            ->editColumn('updated_at', function (Ticket $tickets) {
-                return $tickets->updated_at ? $tickets->updated_at->diffForHumans() : '';
+            ->addColumn('prio', function (Ticket $ticket) {
+                return $ticket->priority;
             })
-            ->rawColumns(['category', 'title', 'status', 'updated_at'])
+            ->addColumn('actions', function (Ticket $ticket) {
+                return Blade::render('
+
+                            <form class="d-inline"  method="post" action="' . route('ticket.close', ['ticket_id' => $ticket->ticket_id ]) . '">
+                                ' . csrf_field() . '
+                                ' . method_field("POST") . '
+                            <button data-content="'.__("Close").'" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-warning mr-1"><i class="fas fa-times"></i></button>
+                            </form>
+');
+            })
+            ->editColumn('title', function (Ticket $ticket) {
+                return "$ticket->title";
+            })
+            ->editColumn('status', function (Ticket $ticket) {
+                return $ticket->status;
+            })
+            ->editColumn('updated_at', function ($model) {
+                return $model->updated_at ? $model->updated_at->diffForHumans() : '';
+            })
+            ->rawColumns(['category','actions', 'code'])
             ->make(true);
     }
+
 }

@@ -2,6 +2,7 @@
 namespace OneDayToDie\TicketSystem\Http\Models;
 
 
+use App\Models\User;
 use \Illuminate\Database\Eloquent\Model as Eloquent;
 
 class Ticket extends Eloquent  {
