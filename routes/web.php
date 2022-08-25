@@ -1,11 +1,13 @@
 <?php
 
+$namespace =  "OneDayToDie\TicketSystem\Http\Controllers";
+
 use OneDayToDie\TicketSystem\Http\Controllers\TicketsController;
 use OneDayToDie\TicketSystem\Http\Controllers\Admin\AdminTicketsController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth')->group(function () {
     #ticket user
+Route::middleware('web')->group(function () {
     Route::get('ticket', [TicketsController::class, 'index'])->name('ticket.index');
     Route::get('ticket/datatable', [TicketsController::class, 'datatable'])->name('ticket.datatable');
     Route::get('ticket/new', [TicketsController::class, 'create'])->name('ticket.new');

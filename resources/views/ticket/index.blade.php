@@ -1,4 +1,4 @@
-@extends('layouts.main')
+@extends('layouts.dashboard')
 
 @section('content')
     <!-- CONTENT HEADER -->
@@ -70,28 +70,9 @@
             </div>
         </div>
     </section>
-    <!-- END CONTENT -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            $('#datatable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.11.3/i18n/{{config("SETTINGS::LOCALE:DATATABLES")}}.json'
-                },
-                processing: true,
-                serverSide: true,
-                stateSave: true,
-                ajax: "{{route('ticket.datatable')}}",
-                columns: [
-                    {data: 'category'},
-                    {data: 'title'},
-                    {data: 'status'},
-                    {data: 'updated_at', sortable: false},
-                ],
-                fnDrawCallback: function( oSettings ) {
-                    $('[data-toggle="popover"]').popover();
-                }
-            });
-        });
-    </script>
+
 @endsection
+
+
+
 

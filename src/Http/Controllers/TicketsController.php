@@ -2,28 +2,32 @@
 
 namespace OneDayToDie\TicketSystem\Http\Controllers;
 
-use App\Models\User;
+
+
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Notification;
 
-use App\Models\Ticket;
 use App\Models\Server;
-use App\Models\TicketComment;
-use App\Models\TicketCategory;
-use App\Models\TicketBlacklist;
+
+
 use Notifications\Ticket\User\CreateNotification;
 use Notifications\Ticket\Admin\AdminCreateNotification;
 use Notifications\Ticket\Admin\AdminReplyNotification;
 
 
+use OneDayToDie\TicketSystem\Http\Models\Ticket;
+use OneDayToDie\TicketSystem\Http\Models\TicketComment;
+use OneDayToDie\TicketSystem\Http\Models\TicketCategory;
+use OneDayToDie\TicketSystem\Http\Models\TicketBlacklist;
+
 class TicketsController extends Controller
 {
     public function index()
     {
-        $tickets = Ticket::where("user_id", Auth::user()->id)->paginate(10);
+        $tickets = Ticket::where("user_id", Auth::id())->paginate(10);
         $ticketcategories = TicketCategory::all();
 
         return view("ticket::ticket.index", compact("tickets", "ticketcategories"));

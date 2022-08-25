@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace OneDayToDie\TicketSystem\Http\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-class TicketBlacklist extends Model {
+use \Illuminate\Database\Eloquent\Model as Eloquent;
+class TicketBlacklist extends Eloquent {
     protected $fillable = [
         'user_id', 'status', 'reason'
     ];
@@ -13,5 +13,4 @@ class TicketBlacklist extends Model {
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
-} 
-  
+}

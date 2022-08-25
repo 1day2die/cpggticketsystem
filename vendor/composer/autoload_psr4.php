@@ -6,5 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Controlpanel\\Voucher\\' => array($baseDir . '/src'),
+    'OneDayToDie\\TicketSystem\\' => array($baseDir . '/src'),
 );
