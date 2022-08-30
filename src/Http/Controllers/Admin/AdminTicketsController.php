@@ -78,9 +78,14 @@ class AdminTicketsController extends Controller
     }
 
 
-    public function blacklist()
+    public function blacklist(Request $request)
     {
-        return view("admin.ticket.blacklist");
+        if ($request->ajax()) {
+            return $this->blacklistDataTableQuery();
+        }
+        $html = $this->blacklistDataTable();
+        $users = User::all();
+        return view("ticket::admin.ticket.blacklist", compact( "html", "users"));
     }
 
     public function blacklistAdd(Request $request)
@@ -92,7 +97,7 @@ class AdminTicketsController extends Controller
             $check->status = "True";
             $check->save();
 
-            return redirect()->back()->with('info', __('Target User already in blacklist. Reason updated'));
+            return redirect()->back()->with('success', __('Target User already in blacklist. Reason updated'));
         }
         TicketBlacklist::create(array(
             "user_id" => $user->id,
@@ -124,51 +129,7 @@ class AdminTicketsController extends Controller
 
     }
 
-    public function dataTableBlacklist()
-    {
-        $query = TicketBlacklist::with(['user']);
-        $query->select('ticket_blacklists.*');
-        return datatables($query)
-            ->editColumn('user', function (TicketBlacklist $blacklist) {
-                return '<a href="' . route('admin.users.show', $blacklist->user->id) . '">' . $blacklist->user->name . '</a>';
-            })
-            ->editColumn('status', function (TicketBlacklist $blacklist) {
-                switch ($blacklist->status) {
-                    case 'True':
-                        $text = "Blocked";
-                        $badgeColor = 'badge-danger';
-                        break;
-                    default:
-                        $text = "Unblocked";
-                        $badgeColor = 'badge-success';
-                        break;
-                }
 
-                return '<span class="badge ' . $badgeColor . '">' . $text . '</span>';
-            })
-            ->editColumn('reason', function (TicketBlacklist $blacklist) {
-                return $blacklist->reason;
-            })
-            ->addColumn('actions', function (TicketBlacklist $blacklist) {
-                return '
-                            <form class="d-inline"  method="post" action="' . route('admin.ticket.blacklist.change', ['id' => $blacklist->id]) . '">
-                                ' . csrf_field() . '
-                                ' . method_field("POST") . '
-                            <button data-content="' . __("Change Status") . '" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-warning mr-1"><i class="fas fa-sync-alt"></i></button>
-                            </form>
-                            <form class="d-inline"  method="post" action="' . route('admin.ticket.blacklist.delete', ['id' => $blacklist->id]) . '">
-                                ' . csrf_field() . '
-                                ' . method_field("POST") . '
-                            <button data-content="' . __("Delete") . '" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-danger mr-1"><i class="fas fa-trash"></i></button>
-                            </form>
-                ';
-            })
-            ->editColumn('created_at', function (TicketBlacklist $blacklist) {
-                return $blacklist->created_at ? $blacklist->created_at->diffForHumans() : '';
-            })
-            ->rawColumns(['user', 'status', 'reason', 'created_at', 'actions'])
-            ->make(true);
-    }
 
 
     /**
@@ -228,6 +189,77 @@ class AdminTicketsController extends Controller
                 return $model->updated_at ? $model->updated_at->diffForHumans() : '';
             })
             ->rawColumns(['category', 'actions', 'code'])
+            ->make(true);
+    }
+
+    /**
+     * @description create table
+     *
+     * @return Builder
+     */
+    public function blacklistDataTable(): Builder
+    {
+
+        $builder = $this->htmlBuilder
+            ->addColumn(['data' => 'user', 'name' => 'user', 'title' => __('User')])
+            ->addColumn(['data' => 'status', 'name' => 'status', 'title' => __('Status')])
+            ->addColumn(['data' => 'reason', 'name' => 'reason', 'title' => __('Reason')])
+            ->addAction(['data' => 'actions', 'name' => 'actions', 'title' => __('Actions'), 'searchable' => false, 'orderable' => false])
+            ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => __('Created at')])
+            ->parameters($this->dataTableDefaultParameters());
+
+        return $builder;
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function blacklistDataTableQuery(): mixed
+    {
+        $query = TicketBlacklist::with(['user']);
+
+
+        return datatables($query)
+            ->addColumn('user', function (TicketBlacklist $blacklist) {
+                return '<a href="' . route('admin.users.show', $blacklist->user->id) . '">' . $blacklist->user->name . '</a>';
+            })
+            ->addColumn('status', function (TicketBlacklist $blacklist) {
+                switch ($blacklist->status) {
+                    case 'True':
+                        $text = "Blocked";
+                        $badgeColor = 'red';
+                        break;
+                    default:
+                        $text = "Unblocked";
+                        $badgeColor = 'green';
+                        break;
+                }
+
+                return "<span style='background-color: $badgeColor' class='badge'>".$text."</span>";
+            })
+            ->editColumn('reason', function (TicketBlacklist $blacklist) {
+                return $blacklist->reason;
+            })
+
+            ->addColumn('actions', function (TicketBlacklist $blacklist) {
+                return '
+                            <form class="d-inline"  method="post" action="' . route('admin.ticket.blacklist.change', ['id' => $blacklist->id]) . '">
+                                ' . csrf_field() . '
+                                ' . method_field("POST") . '
+                            <button data-content="' . __("Change Status") . '" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-warning mr-1"><i class="fas fa-sync-alt"></i></button>
+                            </form>
+                            <form class="d-inline"  method="post" action="' . route('admin.ticket.blacklist.delete', ['id' => $blacklist->id]) . '">
+                                ' . csrf_field() . '
+                                ' . method_field("POST") . '
+                            <button data-content="' . __("Delete") . '" data-toggle="popover" data-trigger="hover" data-placement="top" class="btn btn-sm text-white btn-danger mr-1"><i class="fas fa-trash"></i></button>
+                            </form>
+                ';
+            })
+            ->editColumn('created_at', function (TicketBlacklist $blacklist) {
+                return $blacklist->created_at ? $blacklist->created_at->diffForHumans() : '';
+            })
+            ->rawColumns(['user', 'status', 'reason', 'created_at', 'actions'])
             ->make(true);
     }
 

@@ -23,6 +23,7 @@ Route::middleware('web')->group(function () {
     Route::post('admin/ticket/reply', [AdminTicketsController::class, 'reply'])->name('admin.ticket.reply');
     Route::post('admin/ticket/close/{ticket_id}', [AdminTicketsController::class, 'close'])->name('admin.ticket.close');
     Route::post('admin/ticket/delete/{ticket_id}', [AdminTicketsController::class, 'delete'])->name('admin.ticket.delete');
+
     #ticket moderation blacklist
     Route::get('admin/ticket/blacklist', [AdminTicketsController::class, 'blacklist'])->name('admin.ticket.blacklist');
     Route::post('admin/ticket/blacklist', [AdminTicketsController::class, 'blacklistAdd'])->name('admin.ticket.blacklist.add');

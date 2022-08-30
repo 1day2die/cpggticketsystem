@@ -1,24 +1,8 @@
-@extends('layouts.main')
+@extends('layouts.dashboard')
+
 
 @section('content')
-    <!-- CONTENT HEADER -->
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1>{{ __('Ticket Blacklist') }}</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Dashboard') }}</a></li>
-                        <li class="breadcrumb-item"><a class="text-muted"
-                                                       href="{{ route('admin.ticket.blacklist') }}">{{ __('Ticket Blacklist') }}</a>
-                        </li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-    </section>
+
     <!-- END CONTENT HEADER -->
 
     <!-- MAIN CONTENT -->
@@ -34,19 +18,13 @@
                         </div>
                         <div class="card-body table-responsive">
 
-                            <table id="datatable" class="table table-striped">
-                                <thead>
-                                <tr>
-                                    <th>{{__('User')}}</th>
-                                    <th>{{__('Status')}}</th>
-                                    <th>{{__('Reason')}}</th>
-                                    <th>{{__('Created At')}}</th>
-                                    <th>{{__('Actions')}}</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
+                            <div class="card-body table-responsive">
+
+                                {!! $html->table() !!}
+
+
+
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -69,6 +47,9 @@
                                     </label>
                                     <select id="user_id" style="width:100%" class="custom-select" name="user_id" required
                                             autocomplete="off" @error('user_id') is-invalid @enderror>
+                                        @foreach($users as $user)
+                                            <option value="{{$user->id}}">{{$user->name}}</option>
+                                            @endforeach
                                     </select>
                                 </div>
                                 <div class="form-group ">
@@ -87,96 +68,14 @@
     </section>
     <!-- END CONTENT -->
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            $('#datatable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.11.3/i18n/{{config("SETTINGS::LOCALE:DATATABLES")}}.json'
-                },
-                processing: true,
-                serverSide: true,
-                stateSave: true,
-                ajax: "{{route('admin.ticket.blacklist.datatable')}}",
-                columns: [
-                    {data: 'user' , name : 'user.name'},
-                    {data: 'status'},
-                    {data: 'reason'},
-                    {data: 'created_at', sortable: false},
-                    {data: 'actions', sortable: false},
-                ],
-                fnDrawCallback: function( oSettings ) {
-                    $('[data-toggle="popover"]').popover();
-                }
-            });
-        });
+        document.addEventListener('DOMContentLoaded', (event) => {
+            $('#user_id').select2();
+        })
     </script>
-    <script type="application/javascript">
-        function initUserIdSelect(data) {
-            function escapeHtml(str) {
-                var div = document.createElement('div');
-                div.appendChild(document.createTextNode(str));
-                return div.innerHTML;
-            }
+@endsection
 
-            $('#user_id').select2({
-                ajax: {
-                    url: '/admin/users.json',
-                    dataType: 'json',
-                    delay: 250,
 
-                    data: function (params) {
-                        return {
-                            filter: { email: params.term },
-                            page: params.page,
-                        };
-                    },
-
-                    processResults: function (data, params) {
-                        return { results: data };
-                    },
-
-                    cache: true,
-                },
-
-                data: data,
-                escapeMarkup: function (markup) { return markup; },
-                minimumInputLength: 2,
-                templateResult: function (data) {
-                    if (data.loading) return escapeHtml(data.text);
-
-                    return '<div class="user-block"> \
-                        <img class="img-circle img-bordered-xs" src="' + escapeHtml(data.avatarUrl) + '?s=120" alt="User Image"> \
-                        <span class="username"> \
-                            <a href="#">' + escapeHtml(data.name) +'</a> \
-                        </span> \
-                        <span class="description"><strong>' + escapeHtml(data.email) + '</strong>' + '</span> \
-                    </div>';
-                },
-                templateSelection: function (data) {
-                    return '<div> \
-                        <span> \
-                            <img class="img-rounded img-bordered-xs" src="' + escapeHtml(data.avatarUrl) + '?s=120" style="height:28px;margin-top:-4px;" alt="User Image"> \
-                        </span> \
-                        <span style="padding-left:5px;"> \
-                            ' + escapeHtml(data.name) + ' (<strong>' + escapeHtml(data.email) + '</strong>) \
-                        </span> \
-                    </div>';
-                }
-
-            });
-        }
-
-        $(document).ready(function() {
-            @if (old('user_id'))
-                $.ajax({
-                    url: '/admin/users.json?user_id={{ old('user_id') }}',
-                    dataType: 'json',
-                }).then(function (data) {
-                    initUserIdSelect([ data ]);
-                });
-            @else
-                initUserIdSelect();
-            @endif
-        });
-    </script>
+@section('scripts')
+    {!! $html->scripts() !!}
 @endsection
 
