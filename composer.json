@@ -20,6 +20,8 @@
             ]
         }
     },
-    "minimum-stability": "dev",
-    "require": {}
+    "require": {
+        "1day2die/cpgg-discordwebhooks": "@dev"
+    },
+    "minimum-stability": "dev"
 }
