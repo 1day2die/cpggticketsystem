@@ -6,12 +6,14 @@ namespace OneDayToDie\TicketSystem\Http\Controllers;
 
 use App\Models\User;
 
+use Exception;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Notification;
+use OneDayToDie\DiscordWebHook\Classes\DiscordNotification;
 
 use App\Models\Server;
 
@@ -20,10 +22,13 @@ use OneDayToDie\TicketSystem\Http\Models\Ticket;
 use OneDayToDie\TicketSystem\Http\Models\TicketComment;
 use OneDayToDie\TicketSystem\Http\Models\TicketCategory;
 use OneDayToDie\TicketSystem\Http\Models\TicketBlacklist;
+use OneDayToDie\TicketSystem\Settings\TicketSettings;
 use Yajra\DataTables\Html\Builder;
 
 class TicketsController extends Controller
 {
+
+
     public function index(Request $request)
     {
         //datatables
@@ -49,6 +54,8 @@ class TicketsController extends Controller
         return view("ticket::ticket.create", compact("ticketcategories", "servers"));
     }
     public function store(Request $request) {
+        $settings = app(TicketSettings::class);
+
         $this->validate($request, array(
         	"title" => "required",
         	"ticketcategory" => "required",
@@ -68,6 +75,13 @@ class TicketsController extends Controller
         $ticket->save();
         $user = Auth::user();
         $admin = User::permission('1day2die.admin.ticket.read')->permission('1day2die.admin.ticket.write')->get();
+        try{
+            DiscordNotification::embed($settings->webhooknew, "New Supportticket created",
+                $user->name." created a new ticket titled '".$ticket->title."' with the priority '".$ticket->priority. "' \n click here ". route('admin.ticket.show',$ticket->ticket_id), "575287");
+        } catch (Exception $e) {
+            Log::debug("Webhook new Ticket Error. Errormessage: ".$e);
+        }
+
         //$user->notify(new CreateNotification($ticket));
         //Notification::send($admin, new AdminCreateNotification($ticket, $user));
 
@@ -85,6 +99,14 @@ class TicketsController extends Controller
         $ticket = Ticket::where("ticket_id", $ticket_id)->firstOrFail();
         $ticket->status = "Closed";
         $ticket->save();
+        $user = Auth::user();
+        $settings = app(TicketSettings::class);
+        try{
+            DiscordNotification::embed($settings->webhookclosed, "Supportticket closed",
+                "User '". $user->name."' closed the Ticket '".$ticket->title."' with the priority '".$ticket->priority. "' \n click here ". route('admin.ticket.show',$ticket->ticket_id),"15548997");
+        } catch (Exception $e) {
+            Log::debug("Webhook Close Ticket Error. Errormessage: ".$e);
+        }
         return redirect()->back()->with('success', __('A ticket has been closed, ID: #') . $ticket->ticket_id);
     }
 
@@ -108,6 +130,14 @@ class TicketsController extends Controller
         $user = Auth::user();
         $admin = User::permission('1day2die.admin.ticket.read')->permission('1day2die.admin.ticket.write')->get();
         $newmessage = $request->input("ticketcomment");
+
+        $settings = app(TicketSettings::class);
+        try{
+            DiscordNotification::embed($settings->webhookreply, "User replied to Supportticket",
+                "User '". $user->name."' replied to the Ticket '".$ticket->title."' with the priority '".$ticket->priority. "' \n click here ". route('admin.ticket.show',$ticket->ticket_id),"15844367");
+        } catch (Exception $e) {
+            Log::debug("Webhook reply Ticket Error. Errormessage: ".$e);
+        }
         //Notification::send($admin, new AdminReplyNotification($ticket, $user, $newmessage));
         return redirect()->back()->with('success', __('Your comment has been submitted'));
     }

@@ -4,6 +4,7 @@ namespace OneDayToDie\TicketSystem\Http\Controllers\Admin;
 
 use App\Models\User;
 
+use Exception;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +13,8 @@ use App\Models\Server;
 
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Log;
+use OneDayToDie\DiscordWebHook\Classes\DiscordNotification;
 use OneDayToDie\TicketSystem\Http\Models\Ticket;
 use OneDayToDie\TicketSystem\Http\Models\TicketComment;
 use OneDayToDie\TicketSystem\Http\Models\TicketCategory;
@@ -68,6 +71,15 @@ class AdminTicketsController extends Controller
         $ticket->status = "Closed";
         $ticket->save();
         $ticketOwner = $ticket->user;
+
+        $user = Auth::user();
+        $settings = app(TicketSettings::class);
+        try{
+            DiscordNotification::embed($settings->webhookclosed, "Supportticket closed",
+                "Admin ". $user->name." closed the Ticket '".$ticket->title."' with the priority '".$ticket->priority. "' \n click here ". route('admin.ticket.show',$ticket->ticket_id),"15548997");
+        } catch (Exception $e) {
+            Log::debug("Webhook close Ticket Error. Errormessage: ".$e);
+        }
         return redirect()->back()->with('success', __('A ticket has been closed, ID: #') . $ticket->ticket_id);
     }
 
@@ -94,6 +106,13 @@ class AdminTicketsController extends Controller
         $user = User::where('id', $ticket->user_id)->firstOrFail();
         $newmessage = $request->input("ticketcomment");
         $user->notify(new ReplyNotification($ticket, $user, $newmessage));
+        $settings = app(TicketSettings::class);
+        try{
+            DiscordNotification::embed($settings->webhookreply, "Admin replied to Supportticket",
+                "Admin ". $user->name." replied the Ticket '".$ticket->title."' with the priority '".$ticket->priority. "' \n click here ". route('admin.ticket.show',$ticket->ticket_id));
+        } catch (Exception $e) {
+            Log::debug("Webhook reply Ticket Error. Errormessage: ".$e);
+        }
         return redirect()->back()->with('success', __('Your comment has been submitted'));
     }
 
