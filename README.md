@@ -14,7 +14,7 @@ Fully functional Client Ticket system.
 
 Run this from your Terminal inside your Controlpanel directory (usually /var/www/controlpanel)
 <br/>
-`composer require 1day2die/cpgg-ticketsystem`
+`composer require 1day2die/cpgg-ticketsystem`<br/>
 `php artisan migrate`
 
 ## Usage
