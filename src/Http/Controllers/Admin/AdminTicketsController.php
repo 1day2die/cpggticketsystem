@@ -16,10 +16,30 @@ use OneDayToDie\TicketSystem\Http\Models\Ticket;
 use OneDayToDie\TicketSystem\Http\Models\TicketComment;
 use OneDayToDie\TicketSystem\Http\Models\TicketCategory;
 use OneDayToDie\TicketSystem\Http\Models\TicketBlacklist;
+use OneDayToDie\TicketSystem\Settings\TicketSettings;
 use Yajra\DataTables\Html\Builder;
 
 class AdminTicketsController extends Controller
 {
+
+    public function settingsindex(TicketSettings $settings)
+    {
+
+        return view('ticket::settings.ticket', compact('settings'));
+    }
+
+    public function  settingsupdate(TicketSettings $settings, Request $request)
+    {
+
+        $settings->enabled = $request->input('ticket_enabled');
+        $settings->webhooknew = $request->input('ticket_webhook_new') ? :"none";
+        $settings->webhookclosed = $request->input('ticket_webhook_closed') ? :"none";
+        $settings->webhookreply = $request->input('ticket_webhook_reply') ? :"none";
+        $settings->save();
+
+        return redirect()->back()->with('success', __('Settings saved'));
+    }
+
     public function index(Request $request)
     {
         if ($request->ajax()) {

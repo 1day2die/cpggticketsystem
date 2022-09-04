@@ -30,4 +30,7 @@ Route::middleware('web')->group(function () {
     Route::post('admin/ticket/blacklist/delete/{id}', [AdminTicketsController::class, 'blacklistDelete'])->name('admin.ticket.blacklist.delete');
     Route::post('admin/ticket/blacklist/change/{id}', [AdminTicketsController::class, 'blacklistChange'])->name('admin.ticket.blacklist.change');
     Route::get('admin/ticket/blacklist/datatable', [AdminTicketsController::class, 'dataTableBlacklist'])->name('ticket.blacklist.datatable');
+
+    Route::get('settings/ticket', [AdminTicketsController::class, 'settingsindex'])->name('settings.ticket.index');
+    Route::patch('settings/ticket', [AdminTicketsController::class, 'settingsupdate'])->name('settings.ticket.update');
 });
