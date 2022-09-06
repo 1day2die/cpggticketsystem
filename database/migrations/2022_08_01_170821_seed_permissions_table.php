@@ -17,6 +17,7 @@ return new class extends Migration {
         Permission::findOrCreate('1day2die.ticket.write');
         Permission::findOrCreate('1day2die.admin.ticket.read');
         Permission::findOrCreate('1day2die.admin.ticket.write');
+        Permission::findOrCreate('1day2die.admin.ticket.settings');
     }
 
     /**
@@ -30,5 +31,6 @@ return new class extends Migration {
         Permission::findByName('1day2die.ticket.write')->delete();
         Permission::findByName('1day2die.admin.ticket.read')->delete();
         Permission::findByName('1day2die.admin.ticket.write')->delete();
+        Permission::findByName('1day2die.admin.ticket.settings')->delete();
     }
 };

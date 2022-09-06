@@ -10,7 +10,10 @@ class TicketServiceProvider extends BasePackageServiceProvider
     public function boot()
     {
             $sidebarNavigation = __DIR__ . '/../resources/sidebar';
+            $settingsView = __DIR__ . '/../resources/navigation/settings';
 
+
+        $this->loadNavigation(NavigationLocation::settings, $settingsView);
         $this->loadNavigation(NavigationLocation::sidebar, $sidebarNavigation);
 
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
