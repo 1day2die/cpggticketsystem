@@ -24,3 +24,7 @@ This way you can enable/disable the whole system and set the Webhooks for Discor
 ## Support
 DM me on Discord or Join my Discord Hub
 https://discord.gg/UgJcvgCg6N
+
+## Support me!
+
+https://www.patreon.com/1day2die
